@@ -63,6 +63,7 @@ button.ghost:hover{background:#4a3828}
 #tbtns{position:fixed;right:56px;top:10px;display:none;gap:6px}
 #tbtns button{background:rgba(20,14,9,.6);border:0;color:#fff;font-size:13px;border-radius:8px;padding:8px 11px}
 #act{position:fixed;right:22px;bottom:26px;width:86px;height:86px;border-radius:50%;border:2px solid rgba(255,255,255,.55);background:rgba(240,166,75,.88);color:#2a1a0a;font-weight:700;font-size:15px;display:none}
+.dot.toy{margin-left:14px;border-radius:3px;background:linear-gradient(135deg,#7fd4ff,#2f7fd0);box-shadow:0 0 6px #4aa3e8}
 .touch #mini{bottom:auto;top:54px;width:130px;height:130px}
 .touch #prompt{top:auto;bottom:124px}
 .touch #toast{top:auto;bottom:14px;font-size:13.5px}
@@ -71,7 +72,7 @@ button.ghost:hover{background:#4a3828}
 <canvas id="c"></canvas>
 <div id="err"><div>Could not load the 3D library (three.js).<br><br>This page needs an internet connection the first time it opens, to fetch three.js from a CDN.<br>Check your connection and reload.</div></div>
 <div id="cross"></div>
-<div id="hud"><div class="pill" id="lampPill"><span class="dot"></span><b id="lampN">0</b> / 12 lamps<span id="clock">0:00</span></div><div id="tasks"></div><div id="inv"></div><div id="keysHint">E: interact · J: notes · H: hint · N: map · M: sound · Shift: run</div></div>
+<div id="hud"><div class="pill" id="lampPill"><span class="dot"></span><b id="lampN">0</b> / 12 lamps<span class="dot toy"></span><b id="toyN">0</b> / 6 toys<span id="clock">0:00</span></div><div id="tasks"></div><div id="inv"></div><div id="keysHint">E: interact · J: notes · H: hint · N: map · M: sound · Shift: run</div></div>
 <div id="prompt"></div><div id="toast"></div>
 <div id="cap"></div>
 <canvas id="mini" width="190" height="190"></canvas>
@@ -80,7 +81,7 @@ button.ghost:hover{background:#4a3828}
 <button id="act">Use</button>
 <div id="ctrl"><div id="joyBase"><div id="joyKnob"></div></div></div>
 <div class="ov" id="title" style="display:flex"><div class="card">
- <h1>🌿 Home Scavenger Hunt</h1><div class="sub">Twelve brass lamps are hidden around the house. Find them all.</div>
+ <h1>🌿 Home Scavenger Hunt</h1><div class="sub">Twelve brass lamps and six lost toys are hidden around the house. Find them all.</div>
  <div style="font-size:14px;line-height:1.5">Search the porch, passage, stairs, balcony and terrace. Some lamps sit in plain sight. Others are shut in drawers, a trunk, a mailbox and a code box, and paper notes around the house hold the clues.</div>
  <div class="keys"><b>W A S D / arrows</b><span>move (Shift to run)</span><b>Mouse</b><span>look around (click to capture the pointer, Esc to release and pause)</span><b>E or click</b><span>interact: open drawers, search, pick up items, read notes</span><b>J</b><span>re-read the notes you have found</span><b>H</b><span>ask for a hint when you are stuck</span><b>N / M</b><span>top-down map / mute sound</span><b>Touch</b><span>left thumb = move, right thumb = look, round button = interact</span></div>
  <button class="big" id="start">Start the hunt</button>
@@ -89,7 +90,7 @@ button.ghost:hover{background:#4a3828}
 <div class="ov" id="paused"><div class="card"><h1>Paused</h1><div class="sub">Click anywhere to resume</div><div class="note">E interact · J notes · H hint · N map · M sound · Shift run</div></div></div>
 <div class="ov" id="note"><div class="paper"><h2 id="noteT"></h2><div id="noteB"></div><div class="pnav"><span id="noteNav"><button id="noteP">‹</button> <span id="noteI"></span> <button id="noteN">›</button></span><button id="noteX">Close (E)</button></div></div></div>
 <div class="ov" id="pad"><div class="card"><h1>Steel box</h1><div class="sub">Enter the 3-digit code</div><div id="padD"><span></span><span></span><span></span></div><div id="padK"></div><div class="note">Type the digits on the keyboard · Backspace to delete · E to step away</div></div></div>
-<div class="ov" id="win"><div class="card"><h1>All 12 lamps found!</h1><div class="sub" id="winS"></div><div style="font-size:14px;line-height:1.5;margin-bottom:8px">Every lamp is back where it belongs, and the house is ready for the evening.</div><button class="big" id="again">Play again</button><button class="big ghost" id="explore">Keep exploring</button></div></div>
+<div class="ov" id="win"><div class="card"><h1>Everything found!</h1><div class="sub" id="winS"></div><div style="font-size:14px;line-height:1.5;margin-bottom:8px">All 12 lamps and all 6 toys are back where they belong, and the monkey got its banana.</div><button class="big" id="again">Play again</button><button class="big ghost" id="explore">Keep exploring</button></div></div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
 <script>window.THREE||document.write('<script src="https://unpkg.com/three@0.149.0/build/three.min.js"><\/script>')</script>
 <script>
@@ -822,7 +823,7 @@ function lock(){if(isTouch){setState('play');return;}canvas.requestPointerLock&&
 document.addEventListener('pointerlockchange',()=>{if(document.pointerLockElement===canvas)setState('play');else if(state==='play')setState('paused');});
 function setState(s){const first=(state==='title'&&s==='play');state=s;$('title').style.display=s==='title'?'flex':'none';$('paused').style.display=s==='paused'?'flex':'none';$('win').style.display=s==='win'?'flex':'none';$('hud').style.display=(s==='play')?'block':'none';
   $('tbtns').style.display=(isTouch&&s==='play')?'flex':'none';if(s!=='play'){$('prompt').style.display='none';$('act').style.display='none';for(const k in keys)keys[k]=false;}
-  if(first)toast('Find the 12 brass lamps. Start with the note on the gate pillar, ahead on your right.',6500);
+  if(first)toast('Find 12 brass lamps and 6 toys. Start with the note on the gate pillar, ahead on your right.',6500);
   $('ctrl').style.display=(isTouch&&s==='play')?'block':'none';$('cross').style.display=(s==='play'&&!isTouch)?'block':'none';}
 $('start').addEventListener('click',()=>{startAudio();lock();});
 $('paused').addEventListener('click',()=>{lock();});
@@ -879,8 +880,8 @@ function toggleMute(){muted=!muted;if(master)master.gain.value=muted?0:0.8;$('mu
 $('mute').addEventListener('click',e=>{e.stopPropagation();toggleMute();});
 
 // ================================================================ GAME: scavenger hunt (12 brass lamps)
-const G={ui:null,time:0,won:false,lamps:0,total:12,inv:{},notes:[],page:0,hints:0,hintSeen:{},flags:{},stepAcc:0,target:null,clk:0};
-const INTER=[],LAMPS=[],TW=[],REACH=2.0;
+const G={ui:null,time:0,won:false,lamps:0,total:12,toys:0,toyTotal:6,inv:{},notes:[],page:0,hints:0,hintSeen:{},flags:{},stepAcc:0,target:null,clk:0};
+const INTER=[],LAMPS=[],TOYS=[],TW=[],REACH=2.0;
 function dmat(color,o){return new THREE.MeshStandardMaterial(Object.assign({color:color,roughness:0.7,metalness:0.05},o||{}));}
 function dbox(parent,mat,x0,x1,y0,y1,z0,z1){const m=new THREE.Mesh(BOXG,mat);m.scale.set(Math.abs(x1-x0),Math.abs(y1-y0),Math.abs(z1-z0));m.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
 function grp(x,y,z,parent){const g=new THREE.Group();g.position.set(x,y,z);(parent||scene).add(g);return g;}
@@ -906,20 +907,21 @@ const SFX={
 // ---- HUD helpers
 function toast(msg,ms){const e=$('toast');e.textContent=msg;e.style.opacity=1;clearTimeout(toast.t);toast.t=setTimeout(()=>{e.style.opacity=0;},ms||3200);}
 function taskList(){const t=[],F=G.flags,I=G.inv;
-  t.push(F.n1?'Find all 12 brass lamps':'Read the note on the gate pillar, just ahead on the right');
+  t.push(F.n1?'Find 12 brass lamps and 6 lost toys':'Read the note on the gate pillar, just ahead on the right');
   if((F.seatTried||I.scooter)&&!F.seatOpen)t.push(I.scooter?'Use the scooter key on the scooter seat':'The scooter seat is locked. Find its key');
   if((F.trunkTried||I.brass)&&!F.trunkOpen)t.push(I.brass?(F.trunkTried?'Unlock the tin trunk on the terrace':'Find what the brass key opens'):'The tin trunk is padlocked. Find its key');
   if((F.mailTried||I.mail)&&!F.mailOpen)t.push(I.mail?(F.mailTried?'Unlock the red mailbox by the small gate':'Find what the mailbox key opens'):'The red mailbox is locked. Find its key');
+  if((F.monkeyTried||I.banana)&&!F.monkeyFed)t.push(I.banana?(F.monkeyTried?'Give the banana to the monkey on the terrace':'Find someone who would like a banana'):'The monkey will not let go of the toy. Find something it would trade for');
   if((F.boxTried||F.n3)&&!F.boxOpen)t.push(F.n3?'Work out the 3-digit code for the steel box (J: notes)':'The steel box needs a 3-digit code. Find the clue');
   return t;}
-function refresh(){$('lampN').textContent=G.lamps;
+function refresh(){$('lampN').textContent=G.lamps;$('toyN').textContent=G.toys;
   $('tasks').innerHTML=taskList().map(s=>'<div>'+s+'</div>').join('');
-  const inv=[];if(G.inv.scooter)inv.push('Scooter key');if(G.inv.brass)inv.push('Brass key');if(G.inv.mail)inv.push('Mailbox key');if(G.notes.length)inv.push('Notes '+G.notes.length+'/3');
+  const inv=[];if(G.inv.scooter)inv.push('Scooter key');if(G.inv.brass)inv.push('Brass key');if(G.inv.mail)inv.push('Mailbox key');if(G.inv.banana)inv.push('Banana');if(G.notes.length)inv.push('Notes '+G.notes.length+'/3');
   $('inv').innerHTML=inv.length?inv.map(s=>'<span>'+s+'</span>').join(''):'<span class="empty">Inventory empty</span>';}
 
 // ---- notes
 const NOTES=[
- {t:'Welcome to the hunt',h:'<p>Twelve brass lamps are hidden around the house: porch, passage, stairs, balcony and terrace. Find every one.</p><p>Some sit in plain sight. Some are shut inside things, so open, search and read everything.</p><p>To get you started:</p><ul><li>"I wait on the sixth step, beside something to drink."</li><li>"I ride pillion in a sea-green tub."</li><li>"Where the house keeps its spare electricity, I sit on top and stay warm."</li></ul><p>The little wooden cabinet by the porch railing has more to say.</p>'},
+ {t:'Welcome to the hunt',h:'<p>Twelve brass lamps are hidden around the house: porch, passage, stairs, balcony and terrace. Find every one.</p><p>Some sit in plain sight. Some are shut inside things, so open, search and read everything.</p><p>To get you started:</p><ul><li>"I wait on the sixth step, beside something to drink."</li><li>"I ride pillion in a sea-green tub."</li><li>"Where the house keeps its spare electricity, I sit on top and stay warm."</li></ul><p>Six toys have gone missing too: a duck, a car, a spinning top, a teddy, a ball and a caped superhero. They are small and well hidden, and a monkey on the terrace was seen holding one of them.</p><p>The little wooden cabinet by the porch railing has more to say.</p>'},
  {t:'Higher up',h:'<ul><li>"Halfway up the first stairs, a blue drum keeps a secret under its cap."</li><li>"Before the last flight to the roof, check the corner of the landing."</li><li>"Two tanks stand on a table of cement. I hide in the shade beneath them."</li><li>"On the long bench by the east wall I sit between the pots, pretending to be one."</li></ul><p><b>Lost keys:</b> did anyone check the pockets before doing the laundry? And the white shoe rack upstairs has a bottom drawer nobody ever opens.</p>'},
  {t:'The steel box',h:'<p>The steel box on the balcony opens with three numbers, in this order:</p><ul><li>How many rides are parked in the porch? Count every one, big or small.</li><li>How many blades does the porch fan have?</li><li>How many flags fly on the terrace?</li></ul>'}];
 function drawNote(){const n=NOTES[G.notes[G.page]];$('noteT').textContent=n.t;$('noteB').innerHTML=n.h;$('noteI').textContent=(G.page+1)+' / '+G.notes.length;
@@ -955,7 +957,7 @@ function lamp(id,w,opt){opt=opt||{};const l=opt.l||w,g=grp(l[0],l[1],l[2],opt.pa
   const f=new THREE.Mesh(FLG,FLAME_M);f.scale.set(0.014,0.03,0.014);f.position.set(0.045,0.075,0);g.add(f);
   g.visible=!opt.hidden;
   const o=inter({id:id,x:w[0],y:w[1]+0.04,z:w[2],r:opt.r||0.13,on:!opt.hidden,label:'Pick up the brass lamp',hint:opt.hint,
-    act(){g.visible=false;o.on=false;o.got=true;G.lamps++;SFX.lamp();toast('Brass lamp found: '+G.lamps+' of '+G.total);refresh();if(G.lamps>=G.total)setTimeout(win,1300);}});
+    act(){g.visible=false;o.on=false;o.got=true;G.lamps++;SFX.lamp();toast('Brass lamp found: '+G.lamps+' of '+G.total);refresh();checkWin();}});
   o.mesh=g;o.flame=f;LAMPS.push(o);return o;}
 function reveal(o,delay){setTimeout(()=>{o.mesh.visible=true;if(!o.got)o.on=true;},delay||0);}
 function keyItem(name,invKey,col,w,opt){opt=opt||{};const l=opt.l||w,g=grp(l[0],l[1],l[2],opt.parent),m=dmat(col,{metalness:0.8,roughness:0.35,emissive:0x1c1608});
@@ -1027,6 +1029,52 @@ const boxLamp=lamp('box',[0.18,H1+0.02,-4.56],{hidden:true,hint:()=>{
 const boxInter=inter({x:0.2,y:H1+0.38,z:-4.56,r:0.24,label:'Open the steel box',act(){G.flags.boxTried=true;refresh();openPad();}});
 function openBox(){boxInter.on=false;G.flags.boxOpen=true;SFX.unlock();tween(boxLid,'rotation.z',0,1.4);reveal(boxLamp,350);refresh();}
 
+// ---- hidden toys, the banana and the monkey
+const SPH=new THREE.SphereGeometry(1,10,8);
+function dsph(parent,mat,x,y,z,sx,sy,sz){const m=new THREE.Mesh(SPH,mat);m.position.set(x,y,z);m.scale.set(sx,sy===undefined?sx:sy,sz===undefined?sx:sz);m.castShadow=true;parent.add(m);return m;}
+function toy(id,name,w,build,hintFn,opt){opt=opt||{};const g=grp(w[0],w[1],w[2]);build(g);g.visible=!opt.hidden;
+  const o=inter({id:id,x:w[0],y:w[1]+(opt.dy||0.05),z:w[2],r:opt.r||0.13,on:!opt.hidden,label:'Pick up the '+name,hint:hintFn,
+    act(){g.visible=false;o.on=false;o.got=true;G.toys++;SFX.lamp();toast('Toy found: '+name+' ('+G.toys+' of '+G.toyTotal+')');refresh();checkWin();}});
+  o.mesh=g;TOYS.push(o);return o;}
+function checkWin(){if(G.lamps>=G.total&&G.toys>=G.toyTotal)setTimeout(win,1300);
+  else if(G.lamps>=G.total&&!G.flags.saidL){G.flags.saidL=true;setTimeout(()=>toast('All 12 lamps found. Now the rest of the toys!',4500),1500);}
+  else if(G.toys>=G.toyTotal&&!G.flags.saidT){G.flags.saidT=true;setTimeout(()=>toast('All 6 toys found. Now the rest of the lamps!',4500),1500);}}
+const YEL=dmat(0xf6cf1e,{roughness:0.5}),ORG=dmat(0xf08a1d),BLK=dmat(0x151515),REDM=dmat(0xd62f2f,{roughness:0.4}),FUR=dmat(0x7a5a3a,{roughness:0.95}),TAN=dmat(0xd9b48a,{roughness:0.9});
+function buildDuck(g){dsph(g,YEL,0,0.045,0,0.06,0.045,0.05);dsph(g,YEL,0.04,0.105,0,0.035);dbox(g,ORG,0.065,0.1,0.09,0.105,-0.015,0.015);dsph(g,BLK,0.06,0.115,0.022,0.006);dsph(g,BLK,0.06,0.115,-0.022,0.006);dbox(g,YEL,-0.08,-0.04,0.05,0.085,-0.012,0.012);}
+function buildCar(g){dbox(g,REDM,-0.075,0.075,0.02,0.055,-0.035,0.035);dbox(g,dmat(0x9fd0e8,{roughness:0.2}),-0.035,0.03,0.055,0.085,-0.03,0.03);for(const x of [-0.045,0.045])for(const z of [-0.038,0.038])dbox(g,BLK,x-0.018,x+0.018,0,0.036,z-0.008,z+0.008);dbox(g,YEL,0.075,0.079,0.03,0.045,-0.025,0.025);}
+function buildTop(g){const c=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.006,0.08,10),dmat(0x2f8f4a,{roughness:0.4}));c.position.y=0.04;c.rotation.z=0.5;c.castShadow=true;g.add(c);dbox(g,REDM,-0.045,-0.033,0.06,0.12,-0.006,0.006).rotation.z=0.5;}
+function buildTeddy(g){const B=dmat(0xa9744a,{roughness:1});dsph(g,B,0,0.075,0,0.065,0.075,0.055);dsph(g,B,0,0.185,0,0.05);dsph(g,B,-0.04,0.23,0,0.02);dsph(g,B,0.04,0.23,0,0.02);dsph(g,TAN,0,0.175,-0.04,0.022,0.018,0.018);dsph(g,BLK,-0.018,0.2,-0.044,0.006);dsph(g,BLK,0.018,0.2,-0.044,0.006);
+  for(const s of [-1,1]){dsph(g,B,s*0.07,0.1,-0.01,0.022,0.04,0.022);dsph(g,B,s*0.04,0.02,-0.04,0.025,0.022,0.04);}}
+function buildBall(g){dsph(g,dmat(0xf4f4f0,{roughness:0.4}),0,0.09,0,0.09);const t=new THREE.Mesh(new THREE.TorusGeometry(0.088,0.012,5,16),dmat(0x1e6fd0));t.position.y=0.09;t.rotation.x=Math.PI/2;g.add(t);const t2=new THREE.Mesh(new THREE.TorusGeometry(0.088,0.012,5,16),REDM);t2.position.y=0.09;g.add(t2);}
+// an original caped superhero figure (teal suit, orange cape, yellow star)
+function buildHero(g){const T=dmat(0x129b9b,{roughness:0.5}),C=dmat(0xf07a1d,{roughness:0.6});dbox(g,T,-0.03,0.03,0.07,0.15,-0.018,0.018);dbox(g,T,-0.028,-0.004,0,0.07,-0.014,0.014);dbox(g,T,0.004,0.028,0,0.07,-0.014,0.014);
+  dbox(g,T,-0.055,-0.03,0.08,0.145,-0.012,0.012);dbox(g,T,0.03,0.055,0.08,0.145,-0.012,0.012);dsph(g,TAN,0,0.175,0,0.024);dbox(g,dmat(0x4b2a7a),-0.025,0.025,0.172,0.184,-0.026,-0.01);
+  dbox(g,C,-0.035,0.035,0.03,0.15,0.018,0.024);dbox(g,YEL,-0.012,0.012,0.105,0.13,-0.021,-0.018);}
+toy('duck','rubber duck',[1.4,0.62,-3.9],buildDuck,()=>'A toy is floating where the water is kept: look in the buckets by the passage railing on the ground floor.');
+toy('car','toy car',[-0.84,0.0,-3.2],buildCar,()=>'A toy is parked in the porch, on the floor between the two big palm pots by the kitchen wall.',{r:0.15});
+toy('top','spinning top',[0.13,H1,-3.02],buildTop,()=>'On the balcony, look on the floor at the end of the row of small pots along the wall, near the room door.',{r:0.14});
+toy('teddy','teddy bear',[1.38,1.86,-8.98],buildTeddy,()=>'On the first stair landing, look in the corner behind the blue drum.',{dy:0.12,r:0.15});
+toy('ball','striped ball',[-5.7,H2,-8.12],buildBall,()=>'On the terrace, look under the white chair.',{dy:0.09,r:0.15});
+// banana on the laundry shelf
+{const g=grp(0.26,1.24,-8.52);const b=new THREE.Mesh(new THREE.TorusGeometry(0.075,0.017,6,10,Math.PI*0.75),YEL);b.rotation.x=Math.PI/2;b.castShadow=true;g.add(b);dsph(g,dmat(0x5a4a22),0.075,0,0,0.012);
+ const o=inter({x:0.26,y:1.25,z:-8.52,r:0.13,label:'Pick up the banana',act(){g.visible=false;o.on=false;G.inv.banana=true;SFX.paper();toast('You have a banana');refresh();}});}
+// the monkey sits on the turf table under the solar canopy, facing the stairs
+const MK={g:grp(-0.4,H2+0.49,-2.0),hop:0};
+{const g=MK.g;dsph(g,FUR,0,0.19,0,0.14,0.19,0.13);dsph(g,TAN,0,0.18,-0.075,0.09,0.12,0.07);
+ const h=MK.head=grp(0,0.44,-0.02,g);dsph(h,FUR,0,0,0,0.1);dsph(h,TAN,0,-0.02,-0.07,0.07,0.065,0.045);dsph(h,BLK,-0.032,0.02,-0.092,0.012);dsph(h,BLK,0.032,0.02,-0.092,0.012);dsph(h,BLK,0,-0.03,-0.112,0.01,0.006,0.006);
+ dsph(h,FUR,-0.105,0.01,0,0.035,0.04,0.02);dsph(h,FUR,0.105,0.01,0,0.035,0.04,0.02);dsph(h,TAN,-0.105,0.01,-0.008,0.02,0.025,0.015);dsph(h,TAN,0.105,0.01,-0.008,0.02,0.025,0.015);
+ for(const s of [-1,1]){dsph(g,FUR,s*0.11,0.05,-0.1,0.045,0.04,0.11);dsph(g,FUR,s*0.13,0.22,-0.07,0.035,0.035,0.11).rotation.x=0.5;dsph(g,TAN,s*0.06,0.17,-0.16,0.028);}
+ const tl=MK.tail=new THREE.Mesh(new THREE.TorusGeometry(0.1,0.016,5,12,Math.PI*1.3),FUR);tl.position.set(0.04,0.14,0.16);tl.rotation.y=Math.PI/2;g.add(tl);
+ MK.held=grp(0,0.13,-0.17,g);buildHero(MK.held);
+ MK.ban=grp(0,0.2,-0.17,g);const b=new THREE.Mesh(new THREE.TorusGeometry(0.075,0.017,6,10,Math.PI*0.75),YEL);b.rotation.z=0.4;MK.ban.add(b);MK.ban.visible=false;}
+function chatter(){for(let i=0;i<6;i++)tone(700+Math.random()*500,0.09,'square',0.035,1200+Math.random()*600,i*0.1);}
+const heroToy=toy('hero','superhero figure',[-0.85,H2+0.49,-2.33],buildHero,()=>G.inv.banana?'Take the banana up to the monkey on the terrace. It sits on the green table under the solar panel.':(G.flags.monkeyFed?'The monkey dropped the superhero on the green table on the terrace.':'The monkey on the terrace will trade its toy for a banana. One was left on the shelf above the washing machine.'),{hidden:true,dy:0.09,r:0.14});
+const monkey=inter({x:-0.4,y:H2+0.8,z:-2.0,r:0.3,label:'Talk to the monkey',act(){
+  if(G.flags.monkeyFed){chatter();toast('The monkey munches happily.');return;}
+  if(!G.inv.banana){G.flags.monkeyTried=true;chatter();toast('The monkey hugs a little superhero and will not let go. Maybe it would trade for something tasty.',5200);refresh();return;}
+  delete G.inv.banana;G.flags.monkeyFed=true;MK.held.visible=false;MK.ban.visible=true;MK.hop=2.2;chatter();SFX.lamp();monkey.label='Pat the monkey';
+  toast('The monkey grabs the banana and drops the toy on the table!',4500);heroToy.mesh.visible=true;setTimeout(()=>{heroToy.on=true;},400);refresh();}});
+
 // ---- aiming, interacting, hints, winning
 function pickTarget(){const cx=P.x,cy=P.camY,cz=P.z,cp=Math.cos(P.pitch),fx=-Math.sin(P.yaw)*cp,fy=Math.sin(P.pitch),fz=-Math.cos(P.yaw)*cp,k=isTouch?1.7:1;
   let best=null,bs=1e9;
@@ -1038,7 +1086,8 @@ function pickTarget(){const cx=P.x,cy=P.camY,cz=P.z,cp=Math.cos(P.pitch),fx=-Mat
 function interact(){if(state!=='play'||G.ui)return;const o=G.target=pickTarget();if(o&&o.on)o.act();}
 const HINT_ORDER=['step','basin','inverter','cabinet','drum','landing','tank','bench','scooter','trunk','mailbox','box'];
 function hint(){if(G.won)return;if(!G.flags.n1){toast('Start by reading the note on the gate pillar, just ahead on your right.',6000);return;}
-  for(const id of HINT_ORDER){const o=LAMPS.find(l=>l.id===id);if(o&&!o.got){G.hints++;toast('Hint: '+o.hint(),9000);return;}}}
+  for(const id of HINT_ORDER){const o=LAMPS.find(l=>l.id===id);if(o&&!o.got){G.hints++;toast('Hint: '+o.hint(),9000);return;}}
+  for(const o of TOYS)if(!o.got){G.hints++;toast('Hint: '+o.hint(),9000);return;}}
 function win(){if(G.won)return;G.won=true;SFX.win();closeUI();$('winS').textContent='Time '+fmt(G.time)+'  ·  hints used: '+G.hints;setState('win');if(document.exitPointerLock)document.exitPointerLock();}
 $('again').addEventListener('click',()=>{location.reload();});
 $('explore').addEventListener('click',()=>{lock();});
@@ -1054,7 +1103,9 @@ function gameTick(dt,t){
   if(G.target){const l=G.target.label;if(pr._l!==l){pr._l=l;pr.innerHTML=(isTouch?'':'<b>E</b>')+l;}pr.style.display='block';}else pr.style.display='none';
   if(isTouch)$('act').style.display=G.target?'block':'none';
   G.clk+=dt;if(G.clk>0.5){G.clk=0;$('clock').textContent=fmt(G.time);}
-  const fl=1+Math.sin(t*0.02)*0.15+Math.sin(t*0.047)*0.1;for(const o of LAMPS)if(!o.got)o.flame.scale.y=0.03*fl;}
+  const fl=1+Math.sin(t*0.02)*0.15+Math.sin(t*0.047)*0.1;for(const o of LAMPS)if(!o.got)o.flame.scale.y=0.03*fl;
+  MK.head.rotation.z=Math.sin(t*0.0021)*0.22;MK.head.rotation.y=Math.sin(t*0.0013)*0.35;MK.tail.rotation.z=Math.sin(t*0.004)*0.3;
+  if(MK.hop>0){MK.hop-=dt;MK.g.position.y=H2+0.49+Math.abs(Math.sin(MK.hop*9))*0.07;}else MK.g.position.y=H2+0.49;}
 refresh();
 
 // ================================================================ MINIMAP
@@ -1088,7 +1139,7 @@ function frame(t){requestAnimationFrame(frame);const dt=Math.min(0.05,(t-last)/1
   hudT+=dt;if(hudT>0.12){hudT=0;if(mini.style.display!=='none')drawMini();}
   renderer.render(scene,camera);}
 setState('title');requestAnimationFrame(frame);
-window.__game={G,INTER,LAMPS,interact,pickTarget,gameTick,hint,padPress,REACH,P,move,teleport,COL,SURF,surfaceAt,canStand,gotoPhoto,VP,update,keys,state:()=>state,setState};
+window.__game={G,INTER,LAMPS,TOYS,interact,pickTarget,gameTick,hint,padPress,REACH,P,move,teleport,COL,SURF,surfaceAt,canStand,gotoPhoto,VP,update,keys,state:()=>state,setState};
 })();
 
 
